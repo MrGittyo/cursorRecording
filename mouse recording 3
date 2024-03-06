@@ -1,1 +1,43 @@
+import pyautogui
+import time
+import csv
 
+mouse_Recording_On_3 = True
+
+def record_mouse_movements_3(file_path):
+    positions = []
+    timestamps = []
+    last_position = None
+    last_move_time = time.time()
+    time.sleep(3) # Pause gives time for move to start position.
+
+    try:
+        while mouse_Recording_On_3:
+
+            x, y = pyautogui.position()
+
+            # Check if the mouse position is different from the last recorded position
+            if (last_position is None) or (x, y) != last_position:
+
+
+                timestamp = time.time()
+                positions.append((x, y))
+                timestamps.append(timestamp)
+                last_position = (x, y)
+                last_move_time = timestamp
+                print(last_move_time, last_position)
+
+
+        time.sleep(1.1)  # Adjust the sleep duration for less data
+
+    except (KeyboardInterrupt):
+        # Save data to CSV file
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Timestamp', 'X', 'Y'])
+            for i in range(len(positions)):
+                writer.writerow([timestamps[i], positions[i][0], positions[i][1]])
+
+if __name__ == "__main__":
+    file_path = "cursor_moves/positive/human_cursor_record_{}.csv".format(time.time())
+    record_mouse_movements_3(file_path)
