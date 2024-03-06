@@ -5,40 +5,64 @@ import csv
 
 mouse_Recording_On_3 = True
 
-def record_mouse_movements_3(file_path):
-    positions = []
+def record_mouse_movements_3(base_path):
+
     timestamps = []
+    positions = []
     last_position = None
     last_move_time = time.time()
-    time.sleep(3) # Pause gives time for move to start position.
+    time.sleep(3)  # Pause gives time for move to start position.
+    count = 0
+    fileCount = 0
 
     try:
-        while mouse_Recording_On_3:
+        while True:
 
             x, y = pyautogui.position()
 
-            # Check if the mouse position is different from the last recorded position
-            if (last_position is None) or (x, y) != last_position:
+            if mouse_Recording_On_3:
+
+                # Check if the mouse position is different from the last recorded position
+                if (last_position is None) or (x, y) != last_position:
+
+                    timestamp = time.time()
+                    positions.append((x, y))
+                    timestamps.append(timestamp)
+                    last_position = (x, y)
+                    last_move_time = timestamp
+                    #print(last_move_time, last_position)
+
+                    savefile = True
+                    count += 1
+
+                elif time.time() - last_move_time >= 0.21 and savefile and count > 1:
+
+                    file_name = "human_cursor_record_{}.csv".format(time.time())
+                    file_path = os.path.join(base_path, file_name)
+
+                    # Save data to CSV file
+                    with open(file_path, mode='w', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(['Timestamp', 'X', 'Y'])
+                        for i in range(len(positions)):
+                            writer.writerow([timestamps[i], positions[i][0], positions[i][1]])
+
+                    fileCount += 1
+                    print('File Count ',fileCount)
+                    
+                    # Clear the lists after writing data to the file
+                    positions.clear()
+                    timestamps.clear()
+
+                    savefile = False
 
 
-                timestamp = time.time()
-                positions.append((x, y))
-                timestamps.append(timestamp)
-                last_position = (x, y)
-                last_move_time = timestamp
-                print(last_move_time, last_position)
-
-
-        time.sleep(1.1)  # Adjust the sleep duration for less data
+            #time.sleep(1.1)  # Adjust the sleep duration for less data
 
     except (KeyboardInterrupt):
-        # Save data to CSV file
-        with open(file_path, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['Timestamp', 'X', 'Y'])
-            for i in range(len(positions)):
-                writer.writerow([timestamps[i], positions[i][0], positions[i][1]])
+        pass
+
 
 if __name__ == "__main__":
-    file_path = "cursor_moves/positive/human_cursor_record_{}.csv".format(time.time())
-    record_mouse_movements_3(file_path)
+    base_path = "cursor_moves/positive/"
+    record_mouse_movements_3(base_path)
