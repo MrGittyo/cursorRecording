@@ -2,6 +2,7 @@ import pyautogui
 import time
 import csv
 
+
 mouse_Recording_On_3 = True
 
 def record_mouse_movements_3(file_path):
